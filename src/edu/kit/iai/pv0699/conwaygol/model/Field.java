@@ -12,6 +12,22 @@ public class Field {
         this.y = y;
     }
 
+    public void setIsAlive(boolean isAlive){
+        this.isAlive = isAlive;
+    }
+
+    public boolean getIsAlive(){
+        return this.isAlive;
+    }
+
+    public int getX() {
+        return this.x;
+    }
+
+    public int getY() {
+        return this.y;
+    }
+
     @Override
     public String toString() {
         return "Field{" +

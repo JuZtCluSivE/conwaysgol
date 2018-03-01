@@ -9,11 +9,20 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Game extends Application {
+
+    private final int fieldSize = 10;
+    private final int lineWidth = 1;
+    private List<Rectangle> paintedRecs = new ArrayList<>();
 
     public static void main(String[] args) {
         launch(args);
@@ -21,73 +30,92 @@ public class Game extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Conways Game of Life");
 
+        //Erstellt das Fenster und erzeugt ein canvas = fläche, auf der später gezeichnet wird
+        primaryStage.setTitle("Conways Game of Life");
         Group root = new Group();
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
-        Canvas canvas = new Canvas(800, 110);
+        Canvas canvas = new Canvas(1000, 800);
         root.getChildren().add(canvas);
 
-        final int fieldSize = 10;
-        final int lineWidth = 1;
+
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
+        //gameloop wird erzeugt
         Timeline loop = new Timeline();
         loop.setCycleCount(Timeline.INDEFINITE);
 
-        Grid grid = new Grid(canvas.getWidth(), canvas.getHeight(), fieldSize, lineWidth);
+        //grid wird erzeugt
+        Grid grid = new Grid(canvas.getWidth(), canvas.getHeight(), this.fieldSize, this.lineWidth);
         Field fields[][] = grid.getFields();
 
-        System.out.println(fields.length);
-        System.out.println(fields[0].length);
-
+        //zeichnet vertikale Linien
         for( int i = 1; i <= fields.length; i++ ) {
             Line line = new Line(
-                    (i * fieldSize) + (i * lineWidth),
+                    (i * this.fieldSize) + (i * this.lineWidth),
                     0,
-                    (i * fieldSize) + (i * lineWidth),
-                    (fields[0].length * fieldSize) + (fields[0].length * lineWidth) //bis zum ende der höhe nicht arraybreite als höhe
+                    (i * this.fieldSize) + (i * this.lineWidth),
+                    (fields[0].length * this.fieldSize) + (fields[0].length * this.lineWidth) //bis zum ende der höhe nicht arraybreite als höhe
             );
             root.getChildren().add(line);
         }
 
+        //zeichnet horizontale Linien
         for( int j = 1; j <= fields[0].length; j++ ) {
             Line line = new Line(
                     0,
-                    (j * fieldSize) + (j * lineWidth),
-                    (fields.length * fieldSize) + (fields.length * lineWidth), //bis zum ende der breite nicht arrayhöhe als breite
-                    (j * fieldSize) + (j * lineWidth)
+                    (j * this.fieldSize) + (j * this.lineWidth),
+                    (fields.length * this.fieldSize) + (fields.length * this.lineWidth), //bis zum ende der breite nicht arrayhöhe als breite
+                    (j * this.fieldSize) + (j * this.lineWidth)
             );
             root.getChildren().add(line);
         }
 
+        //setzt isAlive der fields aus fields[][]
+        grid.setAlive(30,30,true);
 
 
-
-        /*
-        for( int i = 0; i < fields.length; i++) {
-            Line line = new Line(0, (i * fieldSize + i), (fields.length * fieldSize + fields.length), (i * fieldSize + i));
-            root.getChildren().add(line);
+        //setzt aliveFields
+        for(int i = 0; i < grid.getFields().length; i++){
+            for (int j = 0; j < grid.getFields()[0].length; j++) {
+                if (grid.getFields()[i][j].getIsAlive()){
+                    grid.getAliveFields().add(grid.getFields()[i][j]);
+                }
+            }
         }
 
+        System.out.println(grid.toString());
 
-
-        for( int j = 0; j < fields[0].length; j++) {
-            Line line = new Line((j * fieldSize + j), 0, (j * fieldSize + j), (fields[0].length * fieldSize + fields[0].length));
-            root.getChildren().add(line);
-        }*/
-
+        //erzeugt den KeyFrame
         KeyFrame kf = new KeyFrame(
-                Duration.seconds(0.01),
+                //zeit die jeder Frame läuft
+                Duration.seconds(1),
+                //code der pro frame ausgeführt werden soll
                 ae -> {
-
+                    //alte recs entfernen
+                    for(int i = 0; i < this.paintedRecs.size(); i++){
+                        
+                    }
+                    //aliveFields zeichnen
+                    for(int i = 0; i < grid.getAliveFields().size(); i++){
+                        Rectangle rec = new Rectangle(
+                                (grid.getAliveFields().get(i).getX() * this.fieldSize) + (grid.getAliveFields().get(i).getX() * this.lineWidth),
+                                (grid.getAliveFields().get(i).getY() * this.fieldSize) + (grid.getAliveFields().get(i).getY() * this.lineWidth),
+                                (this.fieldSize),
+                                (this.fieldSize)
+                        );
+                        rec.setFill(Color.BLACK);
+                        this.paintedRecs.add(rec);
+                    }
                 });
 
+        //keyframe wird dem loop hinzugefügt, gestartet und das fenster wird gezeigt
         loop.getKeyFrames().add(kf);
         loop.play();
-
         primaryStage.show();
 
     }
+
+
 }
