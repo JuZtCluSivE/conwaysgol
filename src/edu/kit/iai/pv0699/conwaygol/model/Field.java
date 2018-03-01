@@ -1,10 +1,13 @@
 package edu.kit.iai.pv0699.conwaygol.model;
 
+import javafx.scene.shape.Rectangle;
+
 public class Field {
 
     private boolean isAlive = false;
     private int x;
     private int y;
+    private Rectangle rec;
 
 
     public Field(int x, int y) {
@@ -12,12 +15,16 @@ public class Field {
         this.y = y;
     }
 
-    public void setIsAlive(boolean isAlive){
+    public void setIsAlive(boolean isAlive) {
         this.isAlive = isAlive;
     }
 
-    public boolean getIsAlive(){
+    public boolean getIsAlive() {
         return this.isAlive;
+    }
+
+    public Rectangle getRec() {
+        return rec;
     }
 
     public int getX() {
@@ -28,11 +35,24 @@ public class Field {
         return this.y;
     }
 
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+
+    public void setRec(Rectangle rec) {
+        this.rec = rec;
+    }
+
     @Override
     public String toString() {
         return "Field{" +
                 "x=" + x +
                 ", y=" + y +
+                ", isAlive=" + isAlive +
                 '}';
     }
 }
