@@ -21,8 +21,8 @@ import java.util.List;
 
 public class Game extends Application {
 
-    private final int fieldSize = 30;
-    private final int lineWidth = 4;
+    private final int fieldSize = 10;
+    private final int lineWidth = 1;
 
     public static void main(String[] args) {
         launch(args);
@@ -78,10 +78,62 @@ public class Game extends Application {
         }
 
         //setzt isAlive der fields aus fields[][]
-        grid.setAlive(1, 1, true);
 
-        grid.setAlive(3, 7, true);
+        //Wiki andere Objekte, Bsp 1.
+        grid.setAlive(44, 42, true);
+        grid.setAlive(45, 42, true);
+        grid.setAlive(46, 42, true);
 
+        grid.setAlive(44, 43, true);
+        grid.setAlive(46, 43, true);
+        grid.setAlive(44, 44, true);
+        grid.setAlive(46, 44, true);
+
+        grid.setAlive(44, 46, true);
+        grid.setAlive(46, 46, true);
+        grid.setAlive(44, 47, true);
+        grid.setAlive(46, 47, true);
+
+        grid.setAlive(44, 48, true);
+        grid.setAlive(45, 48, true);
+        grid.setAlive(46, 48, true);
+
+
+        //Pulsator
+        grid.setAlive(19, 20, true);
+        grid.setAlive(20, 20, true);
+        grid.setAlive(21, 20, true);
+
+        grid.setAlive(19, 21, true);
+        grid.setAlive(21, 21, true);
+
+
+        grid.setAlive(19, 22, true);
+        grid.setAlive(20, 22, true);
+        grid.setAlive(21, 22, true);
+
+        grid.setAlive(19, 23, true);
+        grid.setAlive(20, 23, true);
+        grid.setAlive(21, 23, true);
+
+        grid.setAlive(19, 24, true);
+        grid.setAlive(20, 24, true);
+        grid.setAlive(21, 24, true);
+
+        grid.setAlive(19, 25, true);
+        grid.setAlive(20, 25, true);
+        grid.setAlive(21, 25, true);
+
+
+        grid.setAlive(19, 26, true);
+        grid.setAlive(21, 26, true);
+
+        grid.setAlive(19, 27, true);
+        grid.setAlive(20, 27, true);
+        grid.setAlive(21, 27, true);
+
+
+        //System.out.println(grid.toString());
 
         //setzt aliveFields
         for( int i = 0; i < grid.getFields().length; i++ ) {
@@ -101,50 +153,59 @@ public class Game extends Application {
             }
         }
 
-        System.out.println(grid.toString());
 
         //erzeugt den KeyFrame
         KeyFrame kf = new KeyFrame(
                 //zeit die jeder Frame läuft
-                Duration.seconds(1),
+                Duration.millis(200),
                 //code der pro frame ausgeführt werden soll
                 ae -> {
+                    List<Field> aliveFields = grid.getAliveFields();
+                    List<Field> shouldAliveFields = new ArrayList<>(aliveFields);
+
+                    //Listsize
+                    System.out.println(grid.getAliveFields().size() + "/" + shouldAliveFields.size());
+
                     //Regeln anwenden
-                    List<Field> shouldAliveFields = new ArrayList<>(grid.getAliveFields());
-                    //Collections.copy(shouldAliveFields, grid.getAliveFields());
+                    aliveFields.forEach(aliveField -> {
+                        List<Field> surrAliveFields = grid.getSurrAliveFields(aliveField);
+                        if( surrAliveFields.size() < 2 || surrAliveFields.size() > 3 ) {
+                            shouldAliveFields.remove(aliveField);
+                        }
+                        grid.getSurrFields(aliveField).forEach(surrField -> {
+                            if( !surrField.getIsAlive() && !shouldAliveFields.contains(surrField) ) {
+                                if( grid.getSurrAliveFields(surrField).size() == 3 ) {
+                                    shouldAliveFields.add(surrField);
+                                }
+                            }
+                        });
+                    });
 
-                    //REGELN, dann:
-                    for( int i = 0; i < grid.getAliveFields().size(); i++ ) {
-                        System.out.println("Rule");
-                        shouldAliveFields.add(grid.getFields()[(shouldAliveFields.get(i).getX() + 1)][shouldAliveFields.get(i).getY()]);
-                    }
-
-                    //alte recs entfernen
-                    for( int i = 0; i < grid.getAliveFields().size(); i++ ) {
-                        System.out.println("del" + i);
-                        if( !shouldAliveFields.contains(grid.getAliveFields().get(i)) ) {
+                    for( Field aliveField : grid.getAliveFields() ) {
+                        if( !shouldAliveFields.contains(aliveField) ) {
                             System.out.println("ifdel");
-                            root.getChildren().remove(grid.getAliveFields().get(i).getRec());
+                            aliveField.setIsAlive(false);
+                            root.getChildren().remove(aliveField.getRec());
                         }
                     }
 
-
                     //aliveFields zeichnen
-                    for( int i = 0; i < shouldAliveFields.size(); i++ ) {
-                        System.out.println("draw" + i);
-                        if( !(grid.getAliveFields().contains(shouldAliveFields.get(i))) ) {
+                    for( Field shouldField : shouldAliveFields ) {
+                        if( !(grid.getAliveFields().contains(shouldField)) ) {
                             System.out.println("ifdraw");
                             Rectangle rec = new Rectangle(
-                                    (shouldAliveFields.get(i).getX() * this.fieldSize) + (shouldAliveFields.get(i).getX() * this.lineWidth),
-                                    (shouldAliveFields.get(i).getY() * this.fieldSize) + (shouldAliveFields.get(i).getY() * this.lineWidth),
+                                    (shouldField.getX() * this.fieldSize) + (shouldField.getX() * this.lineWidth),
+                                    (shouldField.getY() * this.fieldSize) + (shouldField.getY() * this.lineWidth),
                                     (this.fieldSize) + this.lineWidth,
                                     (this.fieldSize) + this.lineWidth
                             );
                             rec.setFill(Color.BLACK);
                             root.getChildren().add(rec);
-                            shouldAliveFields.get(i).setRec(rec);
+                            shouldField.setIsAlive(true);
+                            shouldField.setRec(rec);
                         }
                     }
+
                     System.out.println(grid.getAliveFields().size() + "/" + shouldAliveFields.size());
                     grid.setAliveFields(shouldAliveFields);
                 });
@@ -153,8 +214,5 @@ public class Game extends Application {
         loop.getKeyFrames().add(kf);
         loop.play();
         primaryStage.show();
-
     }
-
-
 }

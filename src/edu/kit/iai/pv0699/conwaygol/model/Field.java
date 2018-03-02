@@ -9,7 +9,6 @@ public class Field {
     private int y;
     private Rectangle rec;
 
-
     public Field(int x, int y) {
         this.x = x;
         this.y = y;
@@ -33,14 +32,6 @@ public class Field {
 
     public int getY() {
         return this.y;
-    }
-
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    public void setY(int y) {
-        this.y = y;
     }
 
     public void setRec(Rectangle rec) {

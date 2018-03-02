@@ -12,7 +12,6 @@ public class Grid {
     private int fieldSize;
     private int lineWidth;
 
-
     public Grid(double width, double height, int fieldSize, int lineWidth) {
         this.width = width;
         this.height = height;
@@ -26,7 +25,7 @@ public class Grid {
      *   menge der fields wird anhand der fenster höhe und breite automatisch festgelegt
      */
     private void initGrid() {
-        fields = new Field[((int) this.width) / (this.fieldSize + this.lineWidth)][((int) this.height) / (this.fieldSize + this.lineWidth)];
+        this.fields = new Field[((int) this.width) / (this.fieldSize + this.lineWidth)][((int) this.height) / (this.fieldSize + this.lineWidth)];
 
         System.out.println(((int) this.width) / (this.fieldSize + this.lineWidth) + "/" + ((int) this.height) / (this.fieldSize + this.lineWidth));
 
@@ -53,18 +52,67 @@ public class Grid {
         this.fields[x][y].setIsAlive(isAlive);
     }
 
+    public List<Field> getSurrFields(Field field) {
+        int counter = 0;
+        List<Field> surrFields = new ArrayList<>();
+        do {
+            try {
+                switch( counter ) {
+                    case 0:
+                        counter++;
+                        surrFields.add(this.fields[field.getX()][field.getY() - 1]);
+                    case 1:
+                        counter++;
+                        surrFields.add(this.fields[field.getX() + 1][field.getY() - 1]);
+                    case 2:
+                        counter++;
+                        surrFields.add(this.fields[field.getX() + 1][field.getY()]);
+                    case 3:
+                        counter++;
+                        surrFields.add(this.fields[field.getX() + 1][field.getY() + 1]);
+                    case 4:
+                        counter++;
+                        surrFields.add(this.fields[field.getX()][field.getY() + 1]);
+                    case 5:
+                        counter++;
+                        surrFields.add(this.fields[field.getX() - 1][field.getY() + 1]);
+                    case 6:
+                        counter++;
+                        surrFields.add(this.fields[field.getX() - 1][field.getY()]);
+                    case 7:
+                        counter++;
+                        surrFields.add(this.fields[field.getX() - 1][field.getY() - 1]);
+                }
+            } catch( ArrayIndexOutOfBoundsException e ) {
+                System.out.println("Field: " + field.toString() + " one surrounding field not found: counter = " + counter);
+            }
+        } while( counter < 8 );
+        return surrFields;
+    }
+
+    public List<Field> getSurrAliveFields(Field field) {
+        List<Field> surrFields = getSurrFields(field);
+        List<Field> aliveSurrFields = new ArrayList<>();
+        surrFields.forEach(surrField -> {
+            if( surrField.getIsAlive() ) {
+                aliveSurrFields.add(surrField);
+            }
+        });
+        return aliveSurrFields;
+    }
+
     @Override
     public String toString() {
         StringBuilder output = new StringBuilder();
         System.out.println("fields:\n");
-        for( int i = 0; i < this.fields.length; i++ ) {
+        for( Field[] field : this.fields ) {
             for( int j = 0; j < this.fields[0].length; j++ ) {
-                output.append(this.fields[i][j].toString() + "\n");
+                output.append(field[j].toString()).append("\n");
             }
         }
         output.append("aliveFields:\n");
-        for( int i = 0; i < this.aliveFields.size(); i++ ) {
-            output.append(this.aliveFields.get(i).toString() + "\n");
+        for( Field aliveField : this.aliveFields ) {
+            output.append(aliveField.toString()).append("\n");
         }
         return output.toString();
     }
