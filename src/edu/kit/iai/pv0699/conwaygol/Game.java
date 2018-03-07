@@ -2,6 +2,7 @@ package edu.kit.iai.pv0699.conwaygol;
 
 import edu.kit.iai.pv0699.conwaygol.model.Field;
 import edu.kit.iai.pv0699.conwaygol.model.Grid;
+import edu.kit.iai.pv0699.conwaygol.util.Counter;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -21,8 +22,12 @@ import java.util.List;
 
 public class Game extends Application {
 
-    private final int fieldSize = 10;
-    private final int lineWidth = 1;
+    private final double width = 1000;
+    private final double height = 1000;
+    private final int fieldSize = 20;
+    private final int lineWidth = 5;
+    private final double factor = 30;
+    private final int durationMillis = 200;
 
     public static void main(String[] args) {
         launch(args);
@@ -38,7 +43,7 @@ public class Game extends Application {
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.initStyle(StageStyle.UNDECORATED);
-        Canvas canvas = new Canvas(1000, 1000);
+        Canvas canvas = new Canvas(this.width, this.height);
         root.getChildren().add(canvas);
 
         GraphicsContext gc = canvas.getGraphicsContext2D();
@@ -48,38 +53,41 @@ public class Game extends Application {
         loop.setCycleCount(Timeline.INDEFINITE);
 
         //grid wird erzeugt
-        Grid grid = new Grid(canvas.getWidth(), canvas.getHeight(), this.fieldSize, this.lineWidth);
+        //Grid grid = new Grid(canvas.getWidth(), canvas.getHeight(), this.fieldSize, this.lineWidth);
+        Grid grid = new Grid(canvas.getWidth(), canvas.getHeight(), this.fieldSize, this.lineWidth, this.factor);
         Field fields[][] = grid.getFields();
         primaryStage.setWidth((fields.length * fieldSize) + (fields.length * lineWidth));
         primaryStage.setHeight((fields[0].length * fieldSize) + (fields[0].length * lineWidth));
 
-        //zeichnet vertikale Linien
-        for( int i = 1; i < fields.length; i++ ) {
-            Line line = new Line(
-                    (i * this.fieldSize) + (i * this.lineWidth),
-                    0,
-                    (i * this.fieldSize) + (i * this.lineWidth),
-                    (fields[0].length * this.fieldSize) + (fields[0].length * this.lineWidth)
-            );
-            line.setStrokeWidth(lineWidth);
-            root.getChildren().add(line);
-        }
 
-        //zeichnet horizontale Linien
-        for( int j = 1; j < fields[0].length; j++ ) {
-            Line line = new Line(
-                    0,
-                    (j * this.fieldSize) + (j * this.lineWidth),
-                    (fields.length * this.fieldSize) + (fields.length * this.lineWidth),
-                    (j * this.fieldSize) + (j * this.lineWidth)
-            );
-            line.setStrokeWidth(lineWidth);
-            root.getChildren().add(line);
+        if(lineWidth > 0) {
+            //zeichnet vertikale Linien
+            for( int i = 1; i < fields.length; i++ ) {
+                Line line = new Line(
+                        (i * this.fieldSize) + (i * this.lineWidth),
+                        0,
+                        (i * this.fieldSize) + (i * this.lineWidth),
+                        (fields[0].length * this.fieldSize) + (fields[0].length * this.lineWidth)
+                );
+                line.setStrokeWidth(lineWidth);
+                root.getChildren().add(line);
+            }
+            //zeichnet horizontale Linien
+            for( int j = 1; j < fields[0].length; j++ ) {
+                Line line = new Line(
+                        0,
+                        (j * this.fieldSize) + (j * this.lineWidth),
+                        (fields.length * this.fieldSize) + (fields.length * this.lineWidth),
+                        (j * this.fieldSize) + (j * this.lineWidth)
+                );
+                line.setStrokeWidth(lineWidth);
+                root.getChildren().add(line);
+            }
         }
 
         //setzt isAlive der fields aus fields[][]
-
         //Wiki andere Objekte, Bsp 1.
+        /*
         grid.setAlive(44, 42, true);
         grid.setAlive(45, 42, true);
         grid.setAlive(46, 42, true);
@@ -131,9 +139,7 @@ public class Game extends Application {
         grid.setAlive(19, 27, true);
         grid.setAlive(20, 27, true);
         grid.setAlive(21, 27, true);
-
-
-        //System.out.println(grid.toString());
+        */
 
         //setzt aliveFields
         for( int i = 0; i < grid.getFields().length; i++ ) {
@@ -153,13 +159,17 @@ public class Game extends Application {
             }
         }
 
-
+        Counter counter = new Counter();
+        final long startNanoTime = System.nanoTime();
         //erzeugt den KeyFrame
         KeyFrame kf = new KeyFrame(
                 //zeit die jeder Frame läuft
-                Duration.millis(200),
+                Duration.millis(durationMillis),
                 //code der pro frame ausgeführt werden soll
                 ae -> {
+
+                    counter.increment();
+
                     List<Field> aliveFields = grid.getAliveFields();
                     List<Field> shouldAliveFields = new ArrayList<>(aliveFields);
 
@@ -183,7 +193,6 @@ public class Game extends Application {
 
                     for( Field aliveField : grid.getAliveFields() ) {
                         if( !shouldAliveFields.contains(aliveField) ) {
-                            System.out.println("ifdel");
                             aliveField.setIsAlive(false);
                             root.getChildren().remove(aliveField.getRec());
                         }
@@ -192,7 +201,6 @@ public class Game extends Application {
                     //aliveFields zeichnen
                     for( Field shouldField : shouldAliveFields ) {
                         if( !(grid.getAliveFields().contains(shouldField)) ) {
-                            System.out.println("ifdraw");
                             Rectangle rec = new Rectangle(
                                     (shouldField.getX() * this.fieldSize) + (shouldField.getX() * this.lineWidth),
                                     (shouldField.getY() * this.fieldSize) + (shouldField.getY() * this.lineWidth),
@@ -205,11 +213,9 @@ public class Game extends Application {
                             shouldField.setRec(rec);
                         }
                     }
-
-                    System.out.println(grid.getAliveFields().size() + "/" + shouldAliveFields.size());
+                    System.out.println("Alive: " + grid.getAliveFields().size() + " / Should:" + shouldAliveFields.size() + " / Counter: " + counter.getCounter() + " / Sekunden: " + (System.nanoTime() - startNanoTime) / 1000000000.0);
                     grid.setAliveFields(shouldAliveFields);
                 });
-
         //keyframe wird dem loop hinzugefügt, gestartet und das fenster wird gezeigt
         loop.getKeyFrames().add(kf);
         loop.play();

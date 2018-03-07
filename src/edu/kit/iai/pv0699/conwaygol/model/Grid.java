@@ -13,11 +13,24 @@ public class Grid {
     private int lineWidth;
 
     public Grid(double width, double height, int fieldSize, int lineWidth) {
+        this(width, height, fieldSize, lineWidth, 0);
+    }
+
+    public Grid(double width, double height, int fieldSize, int lineWidth, double factor) {
         this.width = width;
         this.height = height;
         this.fieldSize = fieldSize;
         this.lineWidth = lineWidth;
         this.initGrid();
+        this.generateAlive(factor);
+    }
+
+    public void generateAlive(double factor) {
+        for( Field[] row : this.fields ) {
+            for( Field field : row ) {
+                field.setIsAlive((Math.random() * 100) <= factor);
+            }
+        }
     }
 
     /*
@@ -26,11 +39,9 @@ public class Grid {
      */
     private void initGrid() {
         this.fields = new Field[((int) this.width) / (this.fieldSize + this.lineWidth)][((int) this.height) / (this.fieldSize + this.lineWidth)];
-
-        System.out.println(((int) this.width) / (this.fieldSize + this.lineWidth) + "/" + ((int) this.height) / (this.fieldSize + this.lineWidth));
-
-        for( int i = 0; i < this.width - this.fieldSize; i = (i + this.fieldSize + this.lineWidth) ) {
-            for( int j = 0; j < this.height - this.fieldSize; j = (j + this.fieldSize + this.lineWidth) ) {
+        for( int i = 0; i <= this.width - this.fieldSize; i = (i + this.fieldSize + this.lineWidth) ) {
+            for( int j = 0; j <= this.height - this.fieldSize; j = (j + this.fieldSize + this.lineWidth) ) {
+                System.out.println(i + " / " + j + " | " + i / (fieldSize + lineWidth) + " / " + j / (fieldSize + lineWidth));
                 this.fields[i / (this.fieldSize + this.lineWidth)][j / (this.fieldSize + this.lineWidth)] = new Field(i / (this.fieldSize + this.lineWidth), j / (this.fieldSize + this.lineWidth));
             }
         }
